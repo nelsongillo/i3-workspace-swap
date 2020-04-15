@@ -12,12 +12,13 @@
 ## Usage
 `i3-workspace-swap [OPTION..]`\
 Arguments:
+* `-d NAME` or `--destination NAME`: destination workspace by name to move content to.
+* `-f` or `--focus`: focus destination workspace after swap
 * `-h` or `--help`: print help message
 * `-i OPTION` or `--interactive OPTION`: uses dmenu to select dest/src; command line arguments will be overwriten
-* `-d NAME` or `--destination NAME`: destination workspace by name to move content to.
 * `-s NAME` or `--source NAME`: source workspace by name to move the content from, if none given the currently focused workspace will be used
 
 Options for interacive mode:
+* `all`: source and destination
 * `dest`: destination only
 * `src`: source only
-* `all`: source and destination

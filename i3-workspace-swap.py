@@ -51,6 +51,8 @@ def main(argv):
     # interactive mode using dmenu
     inter = 0
 
+    # focus after switch
+    focus = False
 
     # workspace names
     sname = None
@@ -63,20 +65,23 @@ def main(argv):
 
     # parse args
     try:
-        opts, args = getopt.getopt(argv, "hd:i:s:", ["help", "destination=", "interactive=", "source="])
+        opts, args = getopt.getopt(argv, "hd:fi:s:", ["help", "destination=", "focus", "interactive=", "source="])
 
     except getopt.GetoptError:
         usage(1)
 
     for opt, arg in opts:
-        if opt in ("-h", "--help"):
+        if opt in ("-d", "--destination"):
+            dname = arg
+
+        elif opt in ("-f", "--focus"):
+            focus = True
+
+        elif opt in ("-h", "--help"):
             usage(0)
 
         elif opt in ("-i", "--interactive"):
             inter = interactive_dict.get(arg, 4)
-        
-        elif opt in ("-d", "--destination"):
-            dname = arg
 
         elif opt in ("-s", "--source"):
             sname = arg
@@ -136,21 +141,25 @@ def main(argv):
 
     # move tmp workspace to source
     i3.command("[con_id={}] move to workspace {}".format(swap_id, sname))
+
+    if focus:
+        i3.command("workspace {}".format(dname))
     
 
 # print usage
 def usage(exitCode):
     msg = """Usage: i3-workspace-swap [-h] [-s NAME] -d NAME
+    -d NAME\t--destination NAME\tdestination workspace by name to move content to
+    -f\t\t--focus\t\t\tfocus destination workspace after swap
     -h\t\t--help\t\t\tprint this mesage
     -i OPTION\t--interactive OPTION\tuses dmenu to select dest/src; command line arguments will be overwriten
-    -d NAME\t--destination NAME\tdestination workspace by name to move content to
     -s NAME\t--source NAME\t\tsource workspace by name to move the content from,
     \t\t\t\t\tif none given the currently focused workspace will be used
 
     Options for interacive mode:
+      all\t\tsource and destination
       dest\t\tdestination only
       src\t\tsource only
-      all\t\tsource and destination
     """
     print(msg)
     sys.exit(exitCode)
