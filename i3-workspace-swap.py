@@ -1,6 +1,7 @@
 #! /bin/python
 
 from i3ipc import Connection
+from subprocess import Popen, PIPE, STDOUT
 
 import getopt
 import sys
@@ -18,12 +19,38 @@ def get_workspace_dict():
                 if workspace.type == "workspace":
                     out[workspace.name] = workspace.id
 
+    # remove none workspace container    
+    out.pop("__i3_scratch", None)
+    return out
+
+# workspace names as newline seperated string
+def prep_dmenu_input(dict):
+    out = ""
+    for key in dict.keys():
+        out += key + "\n"
+
+    return out
+
+# interactive mode using dmenu
+def interactive(prompt, dict):
+    cmd = ["dmenu", "-p", prompt, "-i"]
+    stdinput = prep_dmenu_input(dict).encode("utf-8")
+
+    process = Popen(cmd, stdin = PIPE, stdout = PIPE, stderr = STDOUT)
+    result = process.communicate(stdinput)[0]
+    out = result.decode("utf-8").replace("\n", "")
+    print(out)
     return out
 
 # Main
 def main(argv):
     # dict
     workspace_dict = get_workspace_dict()
+    interactive_dict = {"dest" : 1, "src" : 2, "all" : 3}
+
+    # interactive mode using dmenu
+    inter = 0
+
 
     # workspace names
     sname = None
@@ -36,16 +63,17 @@ def main(argv):
 
     # parse args
     try:
-        opts, args = getopt.getopt(argv, "hd:s:", ["help", "destination=", "source="])
+        opts, args = getopt.getopt(argv, "hd:i:s:", ["help", "destination=", "interactive=", "source="])
 
     except getopt.GetoptError:
-        usage()
-        sys.exit(1)
+        usage(1)
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            usage()
-            sys,exit()
+            usage(0)
+
+        elif opt in ("-i", "--interactive"):
+            inter = interactive_dict.get(arg, 4)
         
         elif opt in ("-d", "--destination"):
             dname = arg
@@ -53,10 +81,27 @@ def main(argv):
         elif opt in ("-s", "--source"):
             sname = arg
 
+    # check for interactive mode
+    # unknown interactive option
+    if inter == 4:
+        print("Error: unknown interactive option!")
+        usage(1)
+    # destination
+    elif inter == 1:
+        dname = interactive("Destination: ", workspace_dict)
+    # source
+    elif inter == 2:
+        sname = interactive("Source: ", workspace_dict)
+    # both
+    elif inter == 3:
+        sname = interactive("Source: ", workspace_dict)
+        dname = interactive("Destination: ", workspace_dict)
+
+
     # no destination given -> exit
     if dname == None:
-        usage()
-        sys.exit(2)    
+        print("Error: No destination given!")
+        usage(1)
 
     # no source given -> use focused workspace + update sname
     if sname == None:
@@ -94,14 +139,21 @@ def main(argv):
     
 
 # print usage
-def usage():
+def usage(exitCode):
     msg = """Usage: i3-workspace-swap [-h] [-s NAME] -d NAME
     -h\t\t--help\t\t\tprint this mesage
+    -i OPTION\t--interactive OPTION\tuses dmenu to select dest/src; command line arguments will be overwriten
     -d NAME\t--destination NAME\tdestination workspace by name to move content to
     -s NAME\t--source NAME\t\tsource workspace by name to move the content from,
     \t\t\t\t\tif none given the currently focused workspace will be used
+
+    Options for interacive mode:
+      dest\t\tdestination only
+      src\t\tsource only
+      all\t\tsource and destination
     """
     print(msg)
+    sys.exit(exitCode)
 
 
 if __name__ == "__main__":
@@ -111,5 +163,4 @@ if __name__ == "__main__":
         main(sys.argv[1:])
     # print usage
     else:
-        usage()
-        sys.exit(1)
+        usage(1)
