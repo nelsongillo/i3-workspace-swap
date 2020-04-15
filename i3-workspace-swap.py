@@ -39,7 +39,6 @@ def interactive(prompt, dict):
     process = Popen(cmd, stdin = PIPE, stdout = PIPE, stderr = STDOUT)
     result = process.communicate(stdinput)[0]
     out = result.decode("utf-8").replace("\n", "")
-    print(out)
     return out
 
 # Main
@@ -65,7 +64,7 @@ def main(argv):
 
     # parse args
     try:
-        opts, args = getopt.getopt(argv, "hd:fi:s:", ["help", "destination=", "focus", "interactive=", "source="])
+        opts, args = getopt.getopt(argv, "d:fhi:s:", ["destination=", "focus", "help", "interactive=", "source="])
 
     except getopt.GetoptError:
         usage(1)
@@ -128,6 +127,9 @@ def main(argv):
     # destination not populated with windows -> just move via name
     if destination == None:
         i3.command("[con_id={}] move to workspace {}".format(source, dname))
+        # focus?
+        if focus:
+            i3.command("workspace {}".format(dname))
         sys.exit()
 
     # move destination to tmp workspace
