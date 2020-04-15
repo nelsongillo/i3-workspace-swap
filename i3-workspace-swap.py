@@ -58,9 +58,12 @@ def main(argv):
         usage()
         sys.exit(2)    
 
-    # no source given -> use focused workspace
+    # no source given -> use focused workspace + update sname
     if sname == None:
         source = i3.get_tree().find_focused().workspace().id
+        for wname, wid in workspace_dict.items():
+            if wid == source:
+                sname = wname
     else:
         source = workspace_dict.get(sname, None)
     
