@@ -9,6 +9,20 @@
 ### Optional Dependecie
 * dmenu: used for interactive mode
 
+## Install
+using [pip](https://pypi.org/project/pip/):
+```sh
+pip install i3-workspace-swap
+```
+
+or manually with
+```sh
+git clone https://github.com/einzigartigerName/i3-workspace-swap.git
+cd i3-workspace-swap
+python setup.py install
+```
+If all dependencies are satisfied, you could just run the script without installing
+
 ## Usage
 `i3-workspace-swap [OPTION..]`\
 Arguments:
