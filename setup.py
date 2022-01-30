@@ -26,5 +26,5 @@ setuptools.setup(
         "Operating System :: POSIX :: Linux",
         'Programming Language :: Python :: 3'
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )
